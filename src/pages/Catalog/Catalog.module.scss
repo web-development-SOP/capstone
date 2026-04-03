@@ -1,0 +1,75 @@
+.page {
+  padding: 24px;
+  min-height: 100vh;
+
+  @media (max-width: 600px) { padding: 16px; }
+}
+
+.pageTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.select {
+  padding: 7px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+
+  &:focus { border-color: var(--accent); }
+  option { background: var(--bg-secondary); }
+}
+
+.resultCount {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+}
+
+.errorBox {
+  padding: 12px 16px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+}
+
+.prompt {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-dim);
+
+  p { margin-top: 10px; color: var(--text-secondary); }
+}
+
+.promptIcon { font-size: 2.5rem; opacity: 0.4; }

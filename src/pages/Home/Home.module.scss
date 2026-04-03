@@ -1,0 +1,88 @@
+.page {
+  padding: 30px 24px;
+  max-width: 960px;
+
+  @media (max-width: 600px) { padding: 20px 16px; }
+}
+
+/* Hero */
+
+.hero {
+  margin-bottom: 30px;
+}
+
+.heroTitle {
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.heroSub {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  max-width: 500px;
+}
+
+/* Sections */
+
+.section { margin-bottom: 28px; }
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Quick links */
+
+.quickLinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.quickCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: var(--accent); }
+}
+
+.quickIcon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+.quickInfo {
+  strong { display: block; font-size: 14px; color: var(--text-primary); margin-bottom: 3px; }
+  p { font-size: 12px; color: var(--text-secondary); }
+}
+
+/* Results grid */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.moreLink {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 13px;
+
+  &:hover { text-decoration: underline; }
+}
+
+.noResults {
+  color: var(--text-secondary);
+  padding: 12px 0;
+}

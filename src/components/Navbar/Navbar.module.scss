@@ -1,0 +1,224 @@
+/* Sidebar always uses the dark-brown/dark bg regardless of theme */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.25s;
+
+  @media (max-width: 768px) {
+    transform: translateX(-100%);
+    &.open { transform: translateX(0); }
+  }
+}
+
+/* Mobile top bar */
+
+.mobileBar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background-color: var(--bg-sidebar);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 101;
+
+  @media (max-width: 768px) { display: flex; }
+}
+
+.mobileLogo {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  span {
+    display: block;
+    height: 2px;
+    width: 22px;
+    background-color: rgba(255,255,255,0.85);
+  }
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  @media (max-width: 768px) { display: block; }
+}
+
+/* Sidebar internals */
+
+.logo {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navList {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.navItem a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+
+  &.active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-left-color: rgba(255,255,255,0.6);
+  }
+
+  svg { flex-shrink: 0; }
+}
+
+.loansBadge {
+  margin-left: auto;
+  background-color: #fff;
+  color: var(--bg-sidebar);
+  font-size: 11px;
+  font-weight: bold;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+/* Bottom */
+
+.bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius);
+  width: 100%;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+}
+
+.userCard {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.username {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  display: block;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logoutBtn {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius);
+  padding: 3px 7px;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
+  }
+}
+
+.loginBtn {
+  display: block;
+  text-align: center;
+  padding: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: bold;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(255,255,255,0.22); }
+}
