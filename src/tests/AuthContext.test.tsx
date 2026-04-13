@@ -3,10 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 
-// ---------------------------------------------------------------------------
-// Mock the entire firebase/auth module.
-// We control what each function returns so tests never hit the network.
-// ---------------------------------------------------------------------------
+// Se simula firebase/auth para que los tests no hagan llamadas a la red
 const mockOnAuthStateChanged = vi.fn();
 const mockSignInWithEmailAndPassword = vi.fn();
 const mockCreateUserWithEmailAndPassword = vi.fn();
@@ -24,12 +21,12 @@ vi.mock('firebase/auth', () => ({
   updateProfile: (...args: unknown[]) => mockUpdateProfile(...args),
 }));
 
-// Mock the firebase app initialisation so initializeApp doesn't need env vars
+// Se simula el modulo de firebase para no necesitar variables de entorno
 vi.mock('../services/firebase', () => ({
   auth: {},
 }));
 
-// Helper: builds a fake Firebase user object
+// Usuario falso de Firebase para usar en los tests
 function makeFbUser(overrides = {}) {
   return {
     uid: 'uid-123',
@@ -40,17 +37,17 @@ function makeFbUser(overrides = {}) {
   };
 }
 
-// Wrapper that provides AuthContext to the hook under test
+// Wrapper que provee el contexto al hook
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Default: no persisted session — Firebase calls the listener with null
+  // Por defecto no hay sesion activa
   mockOnAuthStateChanged.mockImplementation((_auth, cb) => {
     cb(null);
-    return vi.fn(); // unsubscribe no-op
+    return vi.fn();
   });
 });
 
@@ -58,7 +55,6 @@ describe('useAuth — AuthContext', () => {
   it('starts with isLoading=true then resolves to null user', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
-    // After the listener fires (null), loading should resolve
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.user).toBeNull();
     expect(result.current.token).toBeNull();

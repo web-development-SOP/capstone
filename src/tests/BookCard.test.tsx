@@ -4,10 +4,10 @@ import { MemoryRouter } from 'react-router-dom';
 import BookCard from '../components/BookCard/BookCard';
 import type { Book } from '../types';
 
-// Mock CSS modules
+// CSS modules se reemplazan con objetos vacios
 vi.mock('../components/BookCard/BookCard.module.scss', () => ({ default: {} }));
 
-// Mock contexts used inside BookCard
+// Se simula el contexto de prestamos y la funcion de portadas
 vi.mock('../context/LoansContext', () => ({
   useLoans: () => ({ getAvailability: () => 'available' }),
 }));
@@ -63,7 +63,7 @@ describe('BookCard', () => {
 
   it('renders a placeholder letter when there is no cover', () => {
     renderCard(mockBook);
-    expect(screen.getByText('T')).toBeInTheDocument(); // first letter of title
+    expect(screen.getByText('T')).toBeInTheDocument(); // primera letra del titulo
   });
 
   it('contains a "View Details" link pointing to the correct route', () => {

@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Login from '../pages/Login/Login';
 
-// Mock CSS modules
+// CSS modules se reemplazan con objetos vacios
 vi.mock('../pages/Login/Login.module.scss', () => ({ default: {} }));
 
-// Mock AuthContext — we inject our own login spy
+// Se simula AuthContext para inyectar un login controlado
 vi.mock('../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
@@ -27,7 +27,6 @@ function renderLogin() {
 }
 
 describe('Login page', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let loginMock: any;
 
   beforeEach(() => {

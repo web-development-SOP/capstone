@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SearchBar from '../components/SearchBar/SearchBar';
 
-// CSS modules return empty objects in the test environment
+// CSS modules se reemplazan con objetos vacios en el entorno de pruebas
 vi.mock('../components/SearchBar/SearchBar.module.scss', () => ({ default: {} }));
 
 describe('SearchBar', () => {

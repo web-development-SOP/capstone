@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import { useFetch } from '../hooks/useFetch';
 
-// Mock axios at the module level
+// Se simula axios para no hacer llamadas reales a la red
 vi.mock('axios');
 const mockedAxios = vi.mocked(axios, true);
 
@@ -20,7 +20,7 @@ describe('useFetch', () => {
   });
 
   it('sets isLoading=true immediately when a url is provided', () => {
-    // Delay resolution so we can observe the loading state
+    // Promesa que nunca resuelve para observar el estado de carga
     mockedAxios.get = vi.fn().mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useFetch<string[]>('https://example.com/api'));
     expect(result.current.isLoading).toBe(true);

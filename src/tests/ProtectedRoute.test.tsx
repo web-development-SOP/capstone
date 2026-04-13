@@ -3,12 +3,12 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
 
-// Mock AuthContext so we control user/isLoading without hitting Firebase
+// Se simula AuthContext para controlar el estado sin usar Firebase
 vi.mock('../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-// Mock Spinner CSS
+// CSS modules se reemplazan con objetos vacios
 vi.mock('../components/Spinner/Spinner.module.scss', () => ({ default: {} }));
 
 import { useAuth } from '../context/AuthContext';
