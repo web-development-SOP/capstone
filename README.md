@@ -1,204 +1,147 @@
 # UniLib — University Library SPA
 
-A Steam-inspired university library app built with React 18 + TypeScript + Firebase Auth.
+Aplicacion de biblioteca universitaria inspirada en Steam, construida con React 18 + TypeScript + Firebase Auth como proyecto capstone del semestre 6.
 
-**Live URL:** https://YOUR-PROJECT.vercel.app
+**Live URL:** https://capstone-six-ashy.vercel.app
 
-> Replace the URL above with your real Vercel URL after deploying (Step 3).
+---
+
+## Que es esta aplicacion
+
+Construi una SPA (Single Page Application) que simula el sistema de prestamos de una biblioteca universitaria. Los usuarios pueden buscar libros usando la Open Library API, ver el detalle de cada libro, agregar libros a una lista de deseos y gestionar sus prestamos. La pagina de prestamos esta protegida — solo se puede acceder despues de iniciar sesion.
 
 ---
 
 ## Screenshots
 
-### Home — Book catalog
-![Home page showing the book search and catalog grid](docs/screenshots/home.png)
+### Home — Catalogo de libros
+![Home](docs/screenshots/home.png)
 
-### Book detail
-![Book detail page with loan and wishlist actions](docs/screenshots/book-detail.png)
+### Detalle de libro
+![Book Detail](docs/screenshots/book-detail.png)
 
 ### Login
-![Login form with email/password fields](docs/screenshots/login.png)
+![Login](docs/screenshots/login.png)
 
-### My Loans (protected route)
-![Loans page only accessible after signing in](docs/screenshots/loans.png)
-
-> **How to add screenshots:** Run `npm run dev`, take a screenshot of each page, and save the files in `docs/screenshots/`.
+### Mis Prestamos (ruta protegida)
+![Loans](docs/screenshots/loans.png)
 
 ---
 
-## Running the tests
+## Pruebas
+
+Para correr las pruebas:
 
 ```bash
-# Install dependencies (only needed once)
 npm install
-
-# Run the full test suite once
 npm test
-
-# Run tests in watch mode (re-runs on file save)
-npm run test:watch
 ```
 
-Expected output:
+Resultado esperado:
 
 ```
 Test Files  7 passed (7)
      Tests  31 passed (31)
 ```
 
-### What is tested
+Implemente 7 archivos de prueba con Vitest y React Testing Library. Escogi los componentes y hooks mas criticos del flujo de la aplicacion:
 
-| File | Component / Hook | Cases covered |
+| Archivo | Que prueba | Casos |
 |---|---|---|
-| `Spinner.test.tsx` | `<Spinner>` | Default label, custom label |
-| `SearchBar.test.tsx` | `<SearchBar>` | Render, submit, trim, blank guard, loading state |
-| `BookCard.test.tsx` | `<BookCard>` | Cover image, placeholder letter, availability badge, detail link |
-| `useFetch.test.ts` | `useFetch` hook | Null URL, loading state, successful response, network error |
-| `ProtectedRoute.test.tsx` | `<ProtectedRoute>` | Loading spinner, redirect to `/login`, renders children when authenticated |
-| `Login.test.tsx` | `<Login>` page | Field render, empty-field validation, invalid email, successful submit, navigation, wrong credentials error |
-| `AuthContext.test.tsx` | `useAuth` hook | Initial state, persisted session, `login()`, `register()`, `logout()` |
+| `Spinner.test.tsx` | Componente `<Spinner>` | Label por defecto, label personalizado |
+| `SearchBar.test.tsx` | Componente `<SearchBar>` | Render, submit, trim de espacios, input vacio, estado de carga |
+| `BookCard.test.tsx` | Componente `<BookCard>` | Imagen de portada, letra placeholder, badge de disponibilidad, link de detalle |
+| `useFetch.test.ts` | Hook `useFetch` | URL nula, estado de carga, respuesta exitosa, error de red |
+| `ProtectedRoute.test.tsx` | Componente `<ProtectedRoute>` | Spinner mientras carga sesion, redireccion a `/login`, render de children con sesion activa |
+| `Login.test.tsx` | Pagina `<Login>` | Render del formulario, validacion de campos vacios, email invalido, submit correcto, navegacion post-login, error de credenciales |
+| `AuthContext.test.tsx` | Hook `useAuth` | Estado inicial, sesion persistida, `login()`, `register()`, `logout()` |
 
-All external dependencies (Firebase, Axios, CSS Modules) are mocked with `vi.mock()` — no network calls are made during tests.
-
----
-
-## Authentication flow
-
-The app uses **Firebase Authentication** (email/password) via the Firebase Web SDK v9+.
-
-```
-User fills in email + password
-        │
-        ▼
-Login.tsx calls useAuth().login(email, password)
-        │
-        ▼
-AuthContext calls signInWithEmailAndPassword(auth, email, password)
-        │
-        ▼
-Firebase returns a FirebaseUser object
-        │
-        ▼
-AuthContext calls fbUser.getIdToken() → real Firebase JWT (Bearer token)
-        │
-        ├── setUser(toUser(fbUser))   ← stored in React state (memory only)
-        └── setToken(jwt)             ← stored in React state (memory only)
-                │
-                ▼
-        Firebase SDK persists the session in IndexedDB automatically.
-        On every page reload, onAuthStateChanged() fires and restores
-        the user + refreshes the token — no manual localStorage needed.
-                │
-                ▼
-        ProtectedRoute reads useAuth().user
-        ├── isLoading=true  → shows <Spinner>
-        ├── user=null       → <Navigate to="/login">
-        └── user present    → renders the protected page (e.g. /loans)
-```
-
-**Token usage:** `useAuth().token` exposes the JWT so it can be sent as an `Authorization: Bearer <token>` header in any API call that requires authentication.
-
-**Logout:** calls `signOut(auth)` — Firebase clears the persisted session and `onAuthStateChanged` fires with `null`, which resets `user` and `token` to `null`.
+Para los tests use `vi.mock()` para simular Firebase, Axios y los CSS Modules — las pruebas no hacen ninguna llamada de red.
 
 ---
 
-## Tech stack
+## Flujo de autenticacion
 
-| Layer | Technology |
+Use Firebase Authentication con email y password. El token es un JWT real firmado por Firebase.
+
+```mermaid
+sequenceDiagram
+    actor U as Usuario
+    participant L as Login.tsx
+    participant A as AuthContext
+    participant F as Firebase
+    participant P as ProtectedRoute
+
+    U->>L: Llena email + password
+    L->>L: Validacion local
+    L->>A: login(email, password)
+    A->>F: signInWithEmailAndPassword()
+    F-->>A: FirebaseUser
+    A->>F: fbUser.getIdToken()
+    F-->>A: JWT firmado
+    A->>A: setUser() + setToken()
+    Note over F: Sesion persistida en IndexedDB
+    L->>U: navigate("/")
+
+    U->>P: Accede a /loans
+    P->>A: useAuth().user
+    A-->>P: user presente
+    P->>U: Renderiza la pagina
+
+    U->>A: logout()
+    A->>F: signOut()
+    F-->>A: onAuthStateChanged(null)
+    A->>U: Redirige a /login
+```
+
+El flujo paso a paso:
+
+1. El usuario llena el formulario en `/login`. Antes de llamar a Firebase valido localmente el formato del correo y que la contrasena no este vacia.
+2. `AuthContext` llama a `signInWithEmailAndPassword` con las credenciales.
+3. Firebase devuelve el usuario autenticado. Con ese objeto llamo a `fbUser.getIdToken()` para obtener el JWT.
+4. Guardo el usuario y el token en estado de React. Firebase ademas persiste la sesion en `IndexedDB`, por eso al recargar la pagina el usuario sigue logueado sin volver a hacer login.
+5. `ProtectedRoute` lee `useAuth().user` antes de mostrar cualquier pagina protegida. Si `isLoading` es `true` muestra un spinner, si no hay usuario redirige a `/login`, si hay usuario renderiza el contenido.
+6. El token JWT se expone en `useAuth().token` y puede enviarse como `Authorization: Bearer <token>` en peticiones a APIs que requieran autenticacion.
+7. Al hacer logout llamo a `signOut(auth)`. Firebase limpia la sesion y `onAuthStateChanged` dispara con `null`, lo que resetea el estado a `user = null, token = null`.
+
+---
+
+## Stack
+
+| Capa | Tecnologia |
 |---|---|
 | UI | React 18 + TypeScript |
 | Routing | React Router DOM v6 |
-| Styling | CSS Modules + SASS |
-| HTTP | Axios + custom `useFetch` hook |
-| Auth / Backend | Firebase Authentication |
-| State | React Context API |
-| Book data | Open Library REST API |
+| Estilos | CSS Modules + SASS |
+| HTTP | Axios + hook `useFetch` |
+| Auth | Firebase Authentication |
+| Estado | Context API |
+| Datos de libros | Open Library REST API |
 | Build | Vite |
-| Tests | Vitest + React Testing Library |
+| Pruebas | Vitest + React Testing Library |
 | Deploy | Vercel |
 
 ---
 
-## Local development
+## Desarrollo local
 
 ```bash
-# 1. Clone the repo
-git clone <your-repo-url>
+git clone https://github.com/web-development-SOP/capstone.git
 cd capstone
-
-# 2. Install dependencies
 npm install
+```
 
-# 3. Create the environment file
-cp .env.local.example .env.local
-# Fill in your Firebase project values (see below)
+Crea un archivo `.env.local` en la raiz con las variables de Firebase:
 
-# 4. Start the dev server
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+```bash
 npm run dev
 ```
-
-### Environment variables
-
-Create a `.env.local` file in the project root with your Firebase config:
-
-```
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-> These values are in the Firebase console → Project settings → Your apps → SDK setup.
-
----
-
-## Deploying to Vercel
-
-### First deploy (one time)
-
-1. Push your code to GitHub.
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo.
-3. Vercel auto-detects Vite. Leave the build settings as default:
-   - **Build command:** `npm run build`
-   - **Output directory:** `dist`
-4. In **Environment Variables**, add all six `VITE_FIREBASE_*` variables from your `.env.local`.
-5. Click **Deploy**.
-6. Copy the live URL and paste it at the top of this README.
-
-### Re-deploying after changes
-
-```bash
-git add .
-git commit -m "your message"
-git push
-# Vercel redeploys automatically on every push to main
-```
-
-The `vercel.json` at the root already contains the SPA rewrite rule so deep links (e.g. `/loans`, `/book/OL123W`) work correctly after a hard refresh:
-
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
-}
-```
-
----
-
-## Alternative: deploying to Netlify
-
-1. Push your code to GitHub.
-2. Go to [netlify.com](https://netlify.com) → **Add new site** → import from Git.
-3. Set:
-   - **Build command:** `npm run build`
-   - **Publish directory:** `dist`
-4. In **Site configuration → Environment variables**, add the six `VITE_FIREBASE_*` variables.
-5. Click **Deploy site**.
-6. Add a `public/_redirects` file to handle SPA routing:
-
-```
-/*  /index.html  200
-```
-
-> With Netlify you do **not** need `vercel.json` — use `_redirects` instead.
