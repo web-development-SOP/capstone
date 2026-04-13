@@ -6,7 +6,7 @@
 
 ## Parte 1 — Pruebas
 
-Escribi pruebas para los 3 componentes mas criticos y el hook `useFetch` usando Vitest y React Testing Library.
+Escribi pruebas para los 3 componentes mas criticos y el hook useFetch usando Vitest y React Testing Library.
 
 ```bash
 npm test
@@ -17,12 +17,12 @@ npm test
 
 | Archivo | Por que es critico |
 |---|---|
-| `Login.test.tsx` | Punto de entrada — si el formulario falla nadie puede entrar |
-| `ProtectedRoute.test.tsx` | Controla el acceso a rutas protegidas |
-| `BookCard.test.tsx` | Componente que mas se repite en pantalla |
-| `useFetch.test.ts` | Todos los datos de la app pasan por este hook |
+| Login.test.tsx | Punto de entrada — si el formulario falla nadie puede entrar |
+| ProtectedRoute.test.tsx | Controla el acceso a rutas protegidas |
+| BookCard.test.tsx | Componente que mas se repite en pantalla |
+| useFetch.test.ts | Todos los datos de la app pasan por este hook |
 
-Para simular dependencias externas use `vi.mock()`. Asi mockeé axios:
+Para simular dependencias externas use vi.mock(). Asi mockeé axios:
 
 ```ts
 vi.mock('axios');
@@ -61,7 +61,7 @@ sequenceDiagram
     Note over F: Sesion persistida en IndexedDB
 ```
 
-Login, registro y logout en `src/context/AuthContext.tsx`:
+Login, registro y logout en src/context/AuthContext.tsx:
 
 ```ts
 const login = async (email: string, password: string) => {
@@ -77,7 +77,7 @@ const logout = async () => {
 
 El token se guarda en estado de React. Firebase persiste la sesion en IndexedDB, por eso al recargar la pagina el usuario sigue logueado sin volver a iniciar sesion.
 
-Proteccion de rutas en `src/components/ProtectedRoute/ProtectedRoute.tsx`:
+Proteccion de rutas en src/components/ProtectedRoute/ProtectedRoute.tsx:
 
 ```tsx
 if (isLoading) return <Spinner label="Checking session..." />;
@@ -95,9 +95,9 @@ return <>{children}</>;
 
 ## Parte 3 — Despliegue
 
-Desplegue la app en Vercel conectando el repositorio de GitHub. Cada push a `main` redespliega automaticamente.
+Desplegue la app en Vercel conectando el repositorio de GitHub. Cada push a main redespliega automaticamente.
 
-Para que las rutas del SPA funcionen despues de un hard refresh agregue `vercel.json`:
+Para que las rutas del SPA funcionen despues de un hard refresh agregue vercel.json:
 
 ```json
 {
@@ -119,7 +119,7 @@ Las variables de Firebase las configure en el dashboard de Vercel para no expone
 | UI | React 18 + TypeScript |
 | Routing | React Router DOM v6 |
 | Estilos | CSS Modules + SASS |
-| HTTP | Axios + hook `useFetch` |
+| HTTP | Axios + hook useFetch |
 | Auth | Firebase Authentication |
 | Estado | Context API |
 | Datos | Open Library REST API |
@@ -138,7 +138,7 @@ npm install
 npm run dev
 ```
 
-Variables de entorno en `.env.local`:
+Variables de entorno en .env.local:
 
 ```
 VITE_FIREBASE_API_KEY=
