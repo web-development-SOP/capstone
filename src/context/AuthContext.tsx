@@ -1,76 +1,75 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  type User as FirebaseUser,
+} from 'firebase/auth';
+import { auth } from '../services/firebase';
 import type { User } from '../types';
 
 interface AuthContextValue {
   user: User | null;
-  login: (email: string, password: string) => boolean;
-  register: (username: string, email: string, password: string) => boolean;
-  logout: () => void;
+  token: string | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({} as AuthContextValue);
 
-const USERS_KEY = 'lib_users';
-const SESSION_KEY = 'lib_session';
+function toUser(fb: FirebaseUser): User {
+  return {
+    id: fb.uid,
+    username: fb.displayName ?? fb.email?.split('@')[0] ?? 'User',
+    email: fb.email ?? '',
+  };
+}
 
-const loadUsers = (): User[] => {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-};
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  // true while Firebase resolves the persisted session on first load
+  const [isLoading, setIsLoading] = useState(true);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        setUser(toUser(fbUser));
+        // getIdToken returns the real Firebase JWT (Bearer token)
+        const t = await fbUser.getIdToken();
+        setToken(t);
+      } else {
+        setUser(null);
+        setToken(null);
+      }
+      setIsLoading(false);
+    });
+    return unsub;
+  }, []);
 
-  const register = (
-    username: string,
-    email: string,
-    password: string
-  ): boolean => {
-    const users = loadUsers();
-    if (users.find((u) => u.email === email)) return false;
-
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      username,
-      email,
-      password,
-    };
-    localStorage.setItem(USERS_KEY, JSON.stringify([...users, newUser]));
-    setUser(newUser);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
-    return true;
+  const login = async (email: string, password: string) => {
+    const { user: fbUser } = await signInWithEmailAndPassword(auth, email, password);
+    const t = await fbUser.getIdToken();
+    setToken(t);
   };
 
-  const login = (email: string, password: string): boolean => {
-    const found = loadUsers().find(
-      (u) => u.email === email && u.password === password
-    );
-    if (!found) return false;
-    setUser(found);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(found));
-    return true;
+  const register = async (username: string, email: string, password: string) => {
+    const { user: fbUser } = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(fbUser, { displayName: username });
+    const t = await fbUser.getIdToken();
+    setToken(t);
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(SESSION_KEY);
+  const logout = async () => {
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

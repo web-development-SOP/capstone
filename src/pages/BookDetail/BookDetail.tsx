@@ -3,9 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCoverUrl, getWorkDetails } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useLoans } from '../../context/LoansContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { useBookCache } from '../../context/BookCacheContext';
 import Spinner from '../../components/Spinner/Spinner';
-import type { Book } from '../../types';
+import type { Book, ReadingStatus } from '../../types';
 import styles from './BookDetail.module.scss';
 
 function daysUntil(iso: string): number {
@@ -19,6 +20,7 @@ export default function BookDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { borrowBook, returnBook, getAvailability, getActiveLoan } = useLoans();
+  const { addToWishlist, removeFromWishlist, updateStatus, getItem, isInWishlist } = useWishlist();
   const { getBook } = useBookCache();
 
   const [book, setBook] = useState<Book | null>(null);
@@ -65,6 +67,8 @@ export default function BookDetail() {
   const availability = getAvailability(book.id);
   const activeLoan = getActiveLoan(book.id);
   const userLoan = user && activeLoan?.userId === user.id ? activeLoan : undefined;
+  const wishlistItem = getItem(book.id);
+  const inWishlist = isInWishlist(book.id);
 
   return (
     <div className={styles.page}>
@@ -127,6 +131,35 @@ export default function BookDetail() {
                 Sign in to borrow
               </Link>
             )}
+
+            <div className={styles.wishlistRow}>
+              {inWishlist ? (
+                <>
+                  <select
+                    className={styles.statusSelect}
+                    value={wishlistItem?.status}
+                    onChange={(e) => updateStatus(book.id, e.target.value as ReadingStatus)}
+                  >
+                    <option value="Wishlist">Wishlist</option>
+                    <option value="Reading">Reading</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                  <button
+                    className={styles.btnSecondary}
+                    onClick={() => removeFromWishlist(book.id)}
+                  >
+                    Remove from Wishlist
+                  </button>
+                </>
+              ) : (
+                <button
+                  className={styles.btnSecondary}
+                  onClick={() => addToWishlist(book)}
+                >
+                  + Add to Wishlist
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

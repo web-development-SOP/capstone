@@ -59,6 +59,9 @@ export default function Navbar() {
               )}
             </NavLink>
           </li>
+          <li className={styles.navItem}>
+            <NavLink to="/wishlist" className={navClass}>Wishlist</NavLink>
+          </li>
         </ul>
 
         <div className={styles.bottom}>

@@ -31,20 +31,18 @@ export default function Login() {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setGlobalError('');
     if (!validate()) return;
     setIsLoading(true);
-    setTimeout(() => {
-      const ok = login(email, password);
-      if (!ok) {
-        setGlobalError('Invalid email or password.');
-        setIsLoading(false);
-      } else {
-        navigate(from, { replace: true });
-      }
-    }, 300);
+    try {
+      await login(email, password);
+      navigate(from, { replace: true });
+    } catch {
+      setGlobalError('Invalid email or password.');
+      setIsLoading(false);
+    }
   };
 
   return (

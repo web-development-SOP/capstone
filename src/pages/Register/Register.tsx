@@ -35,20 +35,21 @@ export default function Register() {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setGlobalError('');
     if (!validate()) return;
     setIsLoading(true);
-    setTimeout(() => {
-      const ok = register(username, email, password);
-      if (!ok) {
-        setGlobalError('An account with this email already exists.');
-        setIsLoading(false);
-      } else {
-        navigate('/');
-      }
-    }, 300);
+    try {
+      await register(username, email, password);
+      navigate('/');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Registration failed.';
+      setGlobalError(msg.includes('email-already-in-use')
+        ? 'An account with this email already exists.'
+        : msg);
+      setIsLoading(false);
+    }
   };
 
   return (

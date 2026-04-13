@@ -12,10 +12,9 @@ export interface Book {
 }
 
 export interface User {
-  id: string;
-  username: string;
+  id: string;       // Firebase uid
+  username: string; // Firebase displayName
   email: string;
-  password: string; // plaintext, mock auth only
 }
 
 export interface Loan {
