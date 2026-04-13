@@ -27,7 +27,8 @@ function renderLogin() {
 }
 
 describe('Login page', () => {
-  let loginMock: ReturnType<typeof vi.fn>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let loginMock: any;
 
   beforeEach(() => {
     loginMock = vi.fn();
@@ -38,7 +39,7 @@ describe('Login page', () => {
       login: loginMock,
       register: vi.fn(),
       logout: vi.fn(),
-    });
+    } as any);
   });
 
   it('renders email, password fields and a submit button', () => {
