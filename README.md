@@ -4,29 +4,25 @@
 
 ---
 
-## Parte 1 — Pruebas Unitarias e Integracion
+## Parte 1 — Pruebas
 
-Escribi pruebas para los 3 componentes mas criticos y el hook personalizado `useFetch` usando Vitest (API compatible con Jest) y React Testing Library.
-
-Para correr las pruebas:
+Escribi pruebas para los 3 componentes mas criticos y el hook `useFetch` usando Vitest y React Testing Library.
 
 ```bash
 npm test
 ```
 
-<!-- SCREENSHOT: captura la terminal con el resultado de npm test mostrando "31 passed (31)" -->
-![Tests pasando](docs/screenshots/tests.png)
-
-Los archivos de prueba estan en `src/tests/`. Estos son los que escogi y por que:
+*Resultado de las pruebas corriendo:*
+![Pruebas pasando](image.png)
 
 | Archivo | Por que es critico |
 |---|---|
-| `Login.test.tsx` | Es el punto de entrada a la app — si el formulario falla nadie puede entrar |
-| `ProtectedRoute.test.tsx` | Controla que rutas son accesibles — un bug aqui expone datos de otros usuarios |
-| `BookCard.test.tsx` | Es el componente que mas se repite en pantalla — un error rompe todo el catalogo |
-| `useFetch.test.ts` | Todos los datos de la app pasan por este hook — si falla la app queda en blanco |
+| `Login.test.tsx` | Punto de entrada — si el formulario falla nadie puede entrar |
+| `ProtectedRoute.test.tsx` | Controla el acceso a rutas protegidas |
+| `BookCard.test.tsx` | Componente que mas se repite en pantalla |
+| `useFetch.test.ts` | Todos los datos de la app pasan por este hook |
 
-Para simular dependencias externas use `vi.mock()`. Por ejemplo, asi mockeé axios en `useFetch`:
+Para simular dependencias externas use `vi.mock()`. Asi mockeé axios:
 
 ```ts
 vi.mock('axios');
@@ -34,7 +30,7 @@ const mockedAxios = vi.mocked(axios, true);
 mockedAxios.get = vi.fn().mockResolvedValue({ data: { books: ['Book A'] } });
 ```
 
-Y asi mockeé Firebase en los tests de `Login` y `ProtectedRoute` para no hacer llamadas reales:
+Y asi mockeé Firebase para no hacer llamadas reales en los tests:
 
 ```ts
 vi.mock('../context/AuthContext', () => ({
@@ -44,9 +40,9 @@ vi.mock('../context/AuthContext', () => ({
 
 ---
 
-## Parte 2 — Integracion con Backend y Autenticacion
+## Parte 2 — Autenticacion
 
-Conecte la app a Firebase Authentication como backend real. El token es un JWT firmado por Firebase, no uno inventado.
+Conecte la app a Firebase Authentication. El token es un JWT real firmado por Firebase.
 
 ```mermaid
 sequenceDiagram
@@ -65,7 +61,7 @@ sequenceDiagram
     Note over F: Sesion persistida en IndexedDB
 ```
 
-Implemente login, registro y logout en `src/context/AuthContext.tsx`:
+Login, registro y logout en `src/context/AuthContext.tsx`:
 
 ```ts
 const login = async (email: string, password: string) => {
@@ -79,9 +75,9 @@ const logout = async () => {
 };
 ```
 
-El token se guarda en estado de React y Firebase persiste la sesion en IndexedDB automaticamente. Al recargar la pagina `onAuthStateChanged` restaura la sesion sin hacer login de nuevo.
+El token se guarda en estado de React. Firebase persiste la sesion en IndexedDB, por eso al recargar la pagina el usuario sigue logueado sin volver a iniciar sesion.
 
-Las rutas protegidas usan `ProtectedRoute` en `src/components/ProtectedRoute/ProtectedRoute.tsx`:
+Proteccion de rutas en `src/components/ProtectedRoute/ProtectedRoute.tsx`:
 
 ```tsx
 if (isLoading) return <Spinner label="Checking session..." />;
@@ -89,11 +85,11 @@ if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 return <>{children}</>;
 ```
 
-<!-- SCREENSHOT: captura el login en https://capstone-six-ashy.vercel.app/login con sesion iniciada -->
-![Login en produccion](docs/screenshots/login.png)
+*Login funcionando en produccion:*
+![Login en Vercel](image-1.png)
 
-<!-- SCREENSHOT: captura Firebase Console > Authentication > Users mostrando los usuarios registrados -->
-![Usuarios en Firebase](docs/screenshots/firebase-users.png)
+*Usuarios registrados en Firebase Console:*
+![Firebase Auth](image-2.png)
 
 ---
 
@@ -101,7 +97,7 @@ return <>{children}</>;
 
 Desplegue la app en Vercel conectando el repositorio de GitHub. Cada push a `main` redespliega automaticamente.
 
-Para que las rutas del SPA funcionen despues de un hard refresh (por ejemplo `/loans` o `/book/OL123W`) agregue `vercel.json` en la raiz:
+Para que las rutas del SPA funcionen despues de un hard refresh agregue `vercel.json`:
 
 ```json
 {
@@ -109,10 +105,10 @@ Para que las rutas del SPA funcionen despues de un hard refresh (por ejemplo `/l
 }
 ```
 
-Las variables de Firebase las configure directamente en el dashboard de Vercel para no exponer credenciales en el repositorio.
+Las variables de Firebase las configure en el dashboard de Vercel para no exponer credenciales en el repositorio.
 
-<!-- SCREENSHOT: captura https://capstone-six-ashy.vercel.app abierto en el navegador mostrando la app funcionando -->
-![App en produccion](docs/screenshots/deploy.png)
+*App corriendo en produccion:*
+![App en Vercel](image-3.png)
 
 ---
 
