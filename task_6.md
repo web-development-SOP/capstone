@@ -83,34 +83,16 @@ sequenceDiagram
     actor U as Usuario
     participant L as Login.tsx
     participant A as AuthContext
-    participant F as Firebase Auth
-    participant P as ProtectedRoute
-    participant API as API externa
+    participant F as Firebase
 
-    U->>L: Llena email + password y hace submit
-    L->>L: Validacion local (formato, longitud)
+    U->>L: email + password
     L->>A: login(email, password)
-    A->>F: signInWithEmailAndPassword(auth, email, password)
+    A->>F: signInWithEmailAndPassword()
     F-->>A: FirebaseUser
     A->>F: fbUser.getIdToken()
     F-->>A: JWT (Bearer token)
     A->>A: setUser() + setToken()
-    Note over A,F: Firebase persiste la sesion en IndexedDB
-    L->>U: navigate("/loans")
-
-    U->>P: Intenta acceder a /loans
-    P->>A: useAuth().user
-    A-->>P: user presente
-    P->>U: Renderiza la pagina protegida
-
-    U->>API: fetch con Authorization: Bearer jwt
-    API-->>U: Respuesta autenticada
-
-    U->>A: logout()
-    A->>F: signOut(auth)
-    F-->>A: onAuthStateChanged(null)
-    A->>A: user = null, token = null
-    A->>U: Redirige a /login
+    Note over F: Sesion persistida en IndexedDB
 ```
 
 ### Descripcion paso a paso
