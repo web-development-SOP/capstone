@@ -1,68 +1,52 @@
 # UniLib — University Library SPA
 
-Aplicacion de biblioteca universitaria inspirada en Steam, construida con React 18 + TypeScript + Firebase Auth como proyecto capstone del semestre 6.
-
 **Live URL:** https://capstone-six-ashy.vercel.app
 
 ---
 
-## Que es esta aplicacion
+## Parte 1 — Pruebas Unitarias e Integracion
 
-Construi una SPA (Single Page Application) que simula el sistema de prestamos de una biblioteca universitaria. Los usuarios pueden buscar libros usando la Open Library API, ver el detalle de cada libro, agregar libros a una lista de deseos y gestionar sus prestamos. La pagina de prestamos esta protegida — solo se puede acceder despues de iniciar sesion.
-
----
-
-## Screenshots
-
-### Home — Catalogo de libros
-![Home](docs/screenshots/home.png)
-
-### Detalle de libro
-![Book Detail](docs/screenshots/book-detail.png)
-
-### Login
-![Login](docs/screenshots/login.png)
-
-### Mis Prestamos (ruta protegida)
-![Loans](docs/screenshots/loans.png)
-
----
-
-## Pruebas
+Escribi pruebas para los 3 componentes mas criticos y el hook personalizado `useFetch` usando Vitest (API compatible con Jest) y React Testing Library.
 
 Para correr las pruebas:
 
 ```bash
-npm install
 npm test
 ```
 
-Resultado esperado:
+<!-- SCREENSHOT: captura la terminal con el resultado de npm test mostrando "31 passed (31)" -->
+![Tests pasando](docs/screenshots/tests.png)
 
+Los archivos de prueba estan en `src/tests/`. Estos son los que escogi y por que:
+
+| Archivo | Por que es critico |
+|---|---|
+| `Login.test.tsx` | Es el punto de entrada a la app — si el formulario falla nadie puede entrar |
+| `ProtectedRoute.test.tsx` | Controla que rutas son accesibles — un bug aqui expone datos de otros usuarios |
+| `BookCard.test.tsx` | Es el componente que mas se repite en pantalla — un error rompe todo el catalogo |
+| `useFetch.test.ts` | Todos los datos de la app pasan por este hook — si falla la app queda en blanco |
+
+Para simular dependencias externas use `vi.mock()`. Por ejemplo, asi mockeé axios en `useFetch`:
+
+```ts
+vi.mock('axios');
+const mockedAxios = vi.mocked(axios, true);
+mockedAxios.get = vi.fn().mockResolvedValue({ data: { books: ['Book A'] } });
 ```
-Test Files  7 passed (7)
-     Tests  31 passed (31)
+
+Y asi mockeé Firebase en los tests de `Login` y `ProtectedRoute` para no hacer llamadas reales:
+
+```ts
+vi.mock('../context/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
 ```
-
-Implemente 7 archivos de prueba con Vitest y React Testing Library. Escogi los componentes y hooks mas criticos del flujo de la aplicacion:
-
-| Archivo | Que prueba | Casos |
-|---|---|---|
-| `Spinner.test.tsx` | Componente `<Spinner>` | Label por defecto, label personalizado |
-| `SearchBar.test.tsx` | Componente `<SearchBar>` | Render, submit, trim de espacios, input vacio, estado de carga |
-| `BookCard.test.tsx` | Componente `<BookCard>` | Imagen de portada, letra placeholder, badge de disponibilidad, link de detalle |
-| `useFetch.test.ts` | Hook `useFetch` | URL nula, estado de carga, respuesta exitosa, error de red |
-| `ProtectedRoute.test.tsx` | Componente `<ProtectedRoute>` | Spinner mientras carga sesion, redireccion a `/login`, render de children con sesion activa |
-| `Login.test.tsx` | Pagina `<Login>` | Render del formulario, validacion de campos vacios, email invalido, submit correcto, navegacion post-login, error de credenciales |
-| `AuthContext.test.tsx` | Hook `useAuth` | Estado inicial, sesion persistida, `login()`, `register()`, `logout()` |
-
-Para los tests use `vi.mock()` para simular Firebase, Axios y los CSS Modules — las pruebas no hacen ninguna llamada de red.
 
 ---
 
-## Flujo de autenticacion
+## Parte 2 — Integracion con Backend y Autenticacion
 
-Use Firebase Authentication con email y password. El token es un JWT real firmado por Firebase.
+Conecte la app a Firebase Authentication como backend real. El token es un JWT firmado por Firebase, no uno inventado.
 
 ```mermaid
 sequenceDiagram
@@ -70,39 +54,65 @@ sequenceDiagram
     participant L as Login.tsx
     participant A as AuthContext
     participant F as Firebase
-    participant P as ProtectedRoute
 
-    U->>L: Llena email + password
-    L->>L: Validacion local
+    U->>L: email + password
     L->>A: login(email, password)
     A->>F: signInWithEmailAndPassword()
     F-->>A: FirebaseUser
     A->>F: fbUser.getIdToken()
-    F-->>A: JWT firmado
+    F-->>A: JWT (Bearer token)
     A->>A: setUser() + setToken()
     Note over F: Sesion persistida en IndexedDB
-    L->>U: navigate("/")
-
-    U->>P: Accede a /loans
-    P->>A: useAuth().user
-    A-->>P: user presente
-    P->>U: Renderiza la pagina
-
-    U->>A: logout()
-    A->>F: signOut()
-    F-->>A: onAuthStateChanged(null)
-    A->>U: Redirige a /login
 ```
 
-El flujo paso a paso:
+Implemente login, registro y logout en `src/context/AuthContext.tsx`:
 
-1. El usuario llena el formulario en `/login`. Antes de llamar a Firebase valido localmente el formato del correo y que la contrasena no este vacia.
-2. `AuthContext` llama a `signInWithEmailAndPassword` con las credenciales.
-3. Firebase devuelve el usuario autenticado. Con ese objeto llamo a `fbUser.getIdToken()` para obtener el JWT.
-4. Guardo el usuario y el token en estado de React. Firebase ademas persiste la sesion en `IndexedDB`, por eso al recargar la pagina el usuario sigue logueado sin volver a hacer login.
-5. `ProtectedRoute` lee `useAuth().user` antes de mostrar cualquier pagina protegida. Si `isLoading` es `true` muestra un spinner, si no hay usuario redirige a `/login`, si hay usuario renderiza el contenido.
-6. El token JWT se expone en `useAuth().token` y puede enviarse como `Authorization: Bearer <token>` en peticiones a APIs que requieran autenticacion.
-7. Al hacer logout llamo a `signOut(auth)`. Firebase limpia la sesion y `onAuthStateChanged` dispara con `null`, lo que resetea el estado a `user = null, token = null`.
+```ts
+const login = async (email: string, password: string) => {
+  const { user: fbUser } = await signInWithEmailAndPassword(auth, email, password);
+  const t = await fbUser.getIdToken();
+  setToken(t);
+};
+
+const logout = async () => {
+  await signOut(auth);
+};
+```
+
+El token se guarda en estado de React y Firebase persiste la sesion en IndexedDB automaticamente. Al recargar la pagina `onAuthStateChanged` restaura la sesion sin hacer login de nuevo.
+
+Las rutas protegidas usan `ProtectedRoute` en `src/components/ProtectedRoute/ProtectedRoute.tsx`:
+
+```tsx
+if (isLoading) return <Spinner label="Checking session..." />;
+if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+return <>{children}</>;
+```
+
+<!-- SCREENSHOT: captura el login en https://capstone-six-ashy.vercel.app/login con sesion iniciada -->
+![Login en produccion](docs/screenshots/login.png)
+
+<!-- SCREENSHOT: captura Firebase Console > Authentication > Users mostrando los usuarios registrados -->
+![Usuarios en Firebase](docs/screenshots/firebase-users.png)
+
+---
+
+## Parte 3 — Despliegue
+
+Desplegue la app en Vercel conectando el repositorio de GitHub. Cada push a `main` redespliega automaticamente.
+
+Para que las rutas del SPA funcionen despues de un hard refresh (por ejemplo `/loans` o `/book/OL123W`) agregue `vercel.json` en la raiz:
+
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}
+```
+
+Las variables de Firebase las configure directamente en el dashboard de Vercel para no exponer credenciales en el repositorio.
+
+<!-- SCREENSHOT: captura https://capstone-six-ashy.vercel.app abierto en el navegador mostrando la app funcionando -->
+![App en produccion](docs/screenshots/deploy.png)
 
 ---
 
@@ -116,7 +126,7 @@ El flujo paso a paso:
 | HTTP | Axios + hook `useFetch` |
 | Auth | Firebase Authentication |
 | Estado | Context API |
-| Datos de libros | Open Library REST API |
+| Datos | Open Library REST API |
 | Build | Vite |
 | Pruebas | Vitest + React Testing Library |
 | Deploy | Vercel |
@@ -129,9 +139,10 @@ El flujo paso a paso:
 git clone https://github.com/web-development-SOP/capstone.git
 cd capstone
 npm install
+npm run dev
 ```
 
-Crea un archivo `.env.local` en la raiz con las variables de Firebase:
+Variables de entorno en `.env.local`:
 
 ```
 VITE_FIREBASE_API_KEY=
@@ -140,8 +151,4 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
-```
-
-```bash
-npm run dev
 ```
