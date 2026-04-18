@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import BookCard from '../../components/BookCard/BookCard';
 import Spinner from '../../components/Spinner/Spinner';
-import { searchBooks } from '../../services/api';
+import { searchBooks, getCoverUrl } from '../../services/api';
 import { useBookCache } from '../../context/BookCacheContext';
 import type { Book } from '../../types';
 import styles from './Home.module.scss';
@@ -12,8 +16,15 @@ export default function Home() {
   const [results, setResults] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [featured, setFeatured] = useState<Book[]>([]);
   const { cacheBooks } = useBookCache();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    searchBooks('subject:bestseller', 12)
+      .then((books) => setFeatured(books.filter((b) => b.coverId)))
+      .catch(() => {});
+  }, []);
 
   const handleSearch = async (q: string) => {
     setIsLoading(true);
@@ -38,6 +49,40 @@ export default function Home() {
         </p>
         <SearchBar onSearch={handleSearch} isLoading={isLoading} />
       </div>
+
+      {!searched && featured.length > 0 && (
+        <section className={styles.section}>
+          <p className={styles.sectionTitle}>Featured Books</p>
+          <Swiper
+            modules={[Navigation, Autoplay]}
+            navigation
+            autoplay={{ delay: 3500, disableOnInteraction: false }}
+            spaceBetween={16}
+            slidesPerView={2}
+            breakpoints={{
+              480: { slidesPerView: 3 },
+              768: { slidesPerView: 4 },
+              960: { slidesPerView: 5 },
+            }}
+            className={styles.carousel}
+          >
+            {featured.map((book) => (
+              <SwiperSlide key={book.id}>
+                <Link to={`/book/${book.id}`} className={styles.carouselCard}>
+                  <img
+                    src={getCoverUrl(book.coverId!, 'M')}
+                    alt={book.title}
+                    className={styles.carouselCover}
+                    loading="lazy"
+                  />
+                  <p className={styles.carouselTitle}>{book.title}</p>
+                  <p className={styles.carouselAuthor}>{book.author}</p>
+                </Link>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </section>
+      )}
 
       {(searched || isLoading) && (
         <section className={styles.section}>
