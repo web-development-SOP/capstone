@@ -51,7 +51,7 @@ export default function Home() {
       </div>
 
       {!searched && featured.length > 0 && (
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.carouselSection}`}>
           <p className={styles.sectionTitle}>Featured Books</p>
           <Swiper
             modules={[Navigation, Autoplay]}

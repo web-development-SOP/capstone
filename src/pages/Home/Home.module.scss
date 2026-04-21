@@ -89,6 +89,11 @@
 
 /* Carousel */
 
+.carouselSection {
+  @media (max-width: 480px) { display: none; }
+}
+
+
 .carousel {
   --swiper-navigation-color: var(--accent);
   --swiper-navigation-size: 18px;
