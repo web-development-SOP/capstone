@@ -32,14 +32,12 @@ function toUser(fb: FirebaseUser): User {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  // true while Firebase resolves the persisted session on first load
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         setUser(toUser(fbUser));
-        // getIdToken returns the real Firebase JWT (Bearer token)
         const t = await fbUser.getIdToken();
         setToken(t);
       } else {
