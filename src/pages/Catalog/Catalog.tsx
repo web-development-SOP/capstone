@@ -118,7 +118,6 @@ export default function Catalog() {
         </div>
       </div>
 
-      {/* States */}
       {isLoading && <Spinner label="Searching catalogue…" />}
 
       {error && !isLoading && (

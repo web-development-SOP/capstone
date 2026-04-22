@@ -10,7 +10,6 @@ export default function ProtectedRoute({ children }: Props) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  // Wait for Firebase to resolve the persisted session before deciding
   if (isLoading) return <Spinner label="Checking session…" />;
 
   if (!user) {

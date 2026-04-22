@@ -1,5 +1,3 @@
-/* CSS Custom Properties */
-
 :root[data-theme='light'] {
   --bg-primary: #f0f0f0;
   --bg-secondary: #e8e0d8;
@@ -51,8 +49,6 @@
   --sidebar-width: 220px;
   --radius: 4px;
 }
-
-/* Reset */
 
 *, *::before, *::after {
   margin: 0;

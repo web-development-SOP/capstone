@@ -1,5 +1,3 @@
-// Domain interfaces
-
 export interface Book {
   id: string;
   title: string;
@@ -12,8 +10,8 @@ export interface Book {
 }
 
 export interface User {
-  id: string;       // Firebase uid
-  username: string; // Firebase displayName
+  id: string;
+  username: string;
   email: string;
 }
 
@@ -24,8 +22,8 @@ export interface Loan {
   bookAuthor: string;
   bookCoverId?: number;
   userId: string;
-  borrowedAt: string; // ISO date
-  dueDate: string;    // ISO date
+  borrowedAt: string;
+  dueDate: string;
   returnedAt?: string;
 }
 
@@ -49,8 +47,6 @@ export interface Reservation {
   reservedAt: string;
 }
 
-// Generic utility type
-
 export interface PaginatedResult<T> {
   items: T[];
   total: number;
@@ -68,13 +64,9 @@ export function paginate<T>(items: T[], page: number, perPage: number): Paginate
   };
 }
 
-// Derived types
-
 export type ReadingStatus = 'Reading' | 'Completed' | 'Wishlist';
 export type AvailabilityStatus = 'available' | 'on-loan' | 'reserved';
 export type SortField = 'title' | 'author' | 'year';
-
-// Open Library API shapes
 
 export interface OLSearchResponse {
   numFound: number;

@@ -13,7 +13,6 @@ const BookCacheContext = createContext<BookCacheContextValue>(
 export const BookCacheProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // useRef so updates don't cause re-renders
   const cache = useRef<Map<string, Book>>(new Map());
 
   const cacheBooks = (books: Book[]) => {

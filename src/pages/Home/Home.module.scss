@@ -5,8 +5,6 @@
   @media (max-width: 600px) { padding: 20px 16px; }
 }
 
-/* Hero */
-
 .hero {
   margin-bottom: 30px;
 }
@@ -24,8 +22,6 @@
   max-width: 500px;
 }
 
-/* Sections */
-
 .section { margin-bottom: 28px; }
 
 .sectionTitle {
@@ -36,8 +32,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-/* Quick links */
 
 .quickLinks {
   display: grid;
@@ -64,8 +58,6 @@
   strong { display: block; font-size: 14px; color: var(--text-primary); margin-bottom: 3px; }
   p { font-size: 12px; color: var(--text-secondary); }
 }
-
-/* Results grid */
 
 .grid {
   display: grid;
